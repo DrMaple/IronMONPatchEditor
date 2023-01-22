@@ -116,7 +116,7 @@ namespace IronMONPatchEditor
                             string gender = Convert.ToString(br.ReadByte());
                             if (gender == "1")
                                 radioButtonFemale.Checked = true;
-                            else if (gender == "0") 
+                            if (gender == "0") 
                                 radioButtonMale.Checked = true;
 
                             br.BaseStream.Seek(speechSkipInfo2, SeekOrigin.Begin);
@@ -186,8 +186,8 @@ namespace IronMONPatchEditor
                             string gender = Convert.ToString(br.ReadByte());
                             if (gender == "1")
                                 radioButtonFemale.Checked = true;
-                            else if (gender == "0")
-                                radioButtonMale.Checked = true; 
+                            if (gender == "0")
+                                radioButtonMale.Checked = true;
                         }
                         else
                         {
@@ -687,6 +687,8 @@ namespace IronMONPatchEditor
                     radioButtonFemale.Checked = true;
                 else if (gender == "0")
                     radioButtonMale.Checked = true;
+                else
+                    radioButtonFemale.Checked = true;
                 if (gameCode == "BPRE")
                 {
                     br.BaseStream.Seek(rivalName, SeekOrigin.Begin);
