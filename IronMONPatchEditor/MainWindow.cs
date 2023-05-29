@@ -23,7 +23,8 @@ namespace IronMONPatchEditor
                 { 0xCF, 'U' },{ 0xD0, 'V' },{ 0xD1, 'W' },{ 0xD2, 'X' },{ 0xD3, 'Y' },{ 0xD4, 'Z' },{ 0xD5, 'a' },{ 0xD6, 'b' },
                 { 0xD7, 'c' },{ 0xD8, 'd' },{ 0xD9, 'e' },{ 0xDA, 'f' },{ 0xDB, 'g' },{ 0xDC, 'h' },{ 0xDD, 'i' },{ 0xDE, 'j' },
                 { 0xDF, 'k' },{ 0xE0, 'l' },{ 0xE1, 'm' },{ 0xE2, 'n' },{ 0xE3, 'o' },{ 0xE4, 'p' },{ 0xE5, 'q' },{ 0xE6, 'r' },
-                { 0xE7, 's' },{ 0xE8, 't' },{ 0xE9, 'u' },{ 0xEA, 'v' },{ 0xEB, 'w' },{ 0xEC, 'x' },{ 0xED, 'y' },{ 0xEE, 'z' }
+                { 0xE7, 's' },{ 0xE8, 't' },{ 0xE9, 'u' },{ 0xEA, 'v' },{ 0xEB, 'w' },{ 0xEC, 'x' },{ 0xED, 'y' },{ 0xEE, 'z' },
+                { 0x00, ' ' },{ 0xAD, '.' },{ 0xAE, '-' },{ 0xB8, ',' },{ 0xBA, '/' }
             };
         }
 
@@ -715,6 +716,10 @@ public class Encoder
         mapToGame.Add('9', "AA");
         mapToGame.Add('!', "AB");
         mapToGame.Add('?', "AC");
+        mapToGame.Add('.', "AD");
+        mapToGame.Add('-', "AE");
+        mapToGame.Add(',', "B8");
+        mapToGame.Add('/', "BA");
         mapToGame.Add('A', "BB");
         mapToGame.Add('B', "BC");
         mapToGame.Add('C', "BD");
@@ -767,6 +772,7 @@ public class Encoder
         mapToGame.Add('x', "EC");
         mapToGame.Add('y', "ED");
         mapToGame.Add('z', "EE");
+        mapToGame.Add(' ', "00");
 
     }
     public string ConvertString(string input)
