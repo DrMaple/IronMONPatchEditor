@@ -2,7 +2,8 @@ IronMON Patch Editor
 
 Allows you to make edits to the existing Intro Patches for Emerald and Fire Red
 
-Requires an Intro Patch to already be applied to your ROM for this program to work.
+Requires an Intro Patch to already be applied to your ROM for this program to work.  
+This currently does not work with my [Faster Fire Red](https://github.com/DrMaple/Faster-Fire-Red) patch
 
 [Faster Emerald](https://github.com/DrMaple/Faster-Emerald)  
 [Fire Red by DrSeil](https://github.com/DrSeil/FireRed-Intro-Patch/releases/latest)
