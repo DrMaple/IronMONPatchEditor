@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -36,6 +37,7 @@ namespace IronMONPatchEditor
         readonly OpenFileDialog ofd = new OpenFileDialog();
         string currentROM;
         string gameCode;
+        string fireRedVersion;
         private uint playerGender;
         private uint playerName;
         private uint rivalName;
@@ -48,6 +50,7 @@ namespace IronMONPatchEditor
         private uint speechSkipInfo3;
         private uint speechSkipInfo4;
         private uint patchCheck;
+        
 
         private readonly Dictionary<byte, char> mapToASCII;
 
@@ -129,28 +132,58 @@ namespace IronMONPatchEditor
                                 speechSkipButtonOff.Checked = true;
 
                         }
-                        else if (gameCode == "BPRE") // Fire Red
+                        else if (gameCode == "BPRE") // FireRed
                         {
                             playerName = 0x780034;
                             rivalName = 0x78003C;
                             playerGender = 0x780044;
                             stepItems1 = 0x479DA0;
-                            instaPC = 0x1A65FE;
-                            speechSkip = 0xC8ABD0;
                             speechSkipInfo = 0x780000;
                             speechSkipInfo2 = 0x780045;
-                            speechSkipInfo3 = 0xC8D2A0;
-                            patchCheck = 0x01D774;
+                            patchCheck = 0x0860D6;
 
                             EnableEverything();
                             rivalNameTextBox.Enabled = true;
 
                             br.BaseStream.Seek(this.patchCheck, SeekOrigin.Begin);
                             string patchChecker = Convert.ToString(br.ReadByte());
-                            if (patchChecker != "0")
+                            Console.WriteLine("patchCheck = " + patchChecker);
+                            if (patchChecker == "255") // DrSeil Intro Patch
+                            {
+                                //playerName = 0x780034;
+                                //rivalName = 0x78003C;
+                                //playerGender = 0x780044;
+                                //stepItems1 = 0x479DA0;
+                                //instaPC = 0x1A65FE;
+                                speechSkip = 0xC8ABD0;
+                                //speechSkipInfo = 0x780000;
+                                //speechSkipInfo2 = 0x780045;
+                                speechSkipInfo3 = 0xC8D2A0;
+                                fireRedVersion = "OldFireRed";
+                            }
+                            else if (patchChecker == "0") // Faster FireRed or Rev0
+                            {
+                                br.BaseStream.Seek(0x0860D5, SeekOrigin.Begin);
+                                string patchChecker2 = Convert.ToString(br.ReadByte());
+                                Console.WriteLine("patchChecker2 = " + patchChecker2);
+                                if (patchChecker2 == "96") // Faster FireRed
+                                {
+                                    speechSkip = 0x12EF04;
+                                    speechSkipInfo3 = 0x054968;
+                                    fireRedVersion = "FasterFireRed";
+
+                                    instaPCBox.Enabled = false;
+                                }
+                                else
+                                {
+                                    DisableEverything();
+                                    MessageBox.Show("FireRed Intro Patch hasn't been applied yet. Make sure to patch your ROM first before using this tool.", "Unsupported ROM", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+                            }
+                            else
                             {
                                 DisableEverything();
-                                MessageBox.Show("Fire Red Intro Patch hasn't been applied yet. Make sure to patch your ROM first before using this tool.", "Unsupported ROM", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                MessageBox.Show("FireRed Intro Patch hasn't been applied yet. Make sure to patch your ROM first before using this tool.", "Unsupported ROM", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             }
 
 
@@ -170,7 +203,14 @@ namespace IronMONPatchEditor
 
                             br.BaseStream.Seek(instaPC, SeekOrigin.Begin);
                             string instantPC = Convert.ToString(br.ReadByte());
-                            if (instantPC == "4")
+                            br.BaseStream.Seek(0x0860D5, SeekOrigin.Begin);
+                            string patchChecker3 = Convert.ToString(br.ReadByte());
+                            if (patchChecker3 == "96")
+                            {
+                                instaPCOn.Checked = false;
+                                instaPCOff.Checked = false;
+                            }
+                            else if (instantPC == "4")
                                 instaPCOn.Checked = true;
                             else
                                 instaPCOff.Checked = true;
@@ -193,7 +233,7 @@ namespace IronMONPatchEditor
                         else
                         {
                             DisableEverything();
-                            MessageBox.Show("Unsupported ROM loaded. Please load a Fire Red or Emerald ROM with the correct patch applied.", "Unsupported ROM", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            MessageBox.Show("Unsupported ROM loaded. Please load a FireRed or Emerald ROM with the correct patch applied.", "Unsupported ROM", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }
 
                         br.BaseStream.Seek(playerName, SeekOrigin.Begin);
@@ -232,7 +272,7 @@ namespace IronMONPatchEditor
                     }
                     bw.Seek(Convert.ToInt32(playerName), SeekOrigin.Begin);
                     bw.Write(StringToByteArray(encodedPlayerName));
-                    if (gameCode == "BPRE") // Fire Red
+                    if (gameCode == "BPRE") // FireRed
                     {
                         byte[] speechSkipInfoTrue = {
                             0xFE, 0xB4, 0x09, 0x4A, 0x12, 0x68, 0x09, 0x48, 0x09, 0x49, 0x13, 0x18, 0x54, 0x1A, 0x09, 0x48,
@@ -367,8 +407,8 @@ namespace IronMONPatchEditor
                         {
                             byte[] speechSkipTrue = { 0x01, 0x00, 0x78 };
                             byte[] speechSkip2True = {
-                                0x04, 0x4B, 0x1A, 0x68, 0x00, 0x21, 0xD1, 0x74, 0x02, 0x21, 0x11, 0x75, 0x02, 0x21, 0x51, 0x75,
-                                0x70, 0x47, 0x00, 0x00, 0x0C, 0x50, 0x00, 0x03 };
+                            0x04, 0x4B, 0x1A, 0x68, 0x00, 0x21, 0xD1, 0x74, 0x02, 0x21, 0x11, 0x75, 0x02, 0x21, 0x51, 0x75,
+                            0x70, 0x47, 0x00, 0x00, 0x0C, 0x50, 0x00, 0x03 };
                             bw.Seek(Convert.ToInt32(speechSkip), SeekOrigin.Begin);
                             bw.Write(speechSkipTrue);
                             bw.Seek(Convert.ToInt32(speechSkipInfo3), SeekOrigin.Begin);
@@ -376,16 +416,33 @@ namespace IronMONPatchEditor
                         }
                         if (speechSkipButtonOff.Checked)
                         {
-                            byte[] speechSkipFalse = { 0xE9, 0xB9, 0xC8 };
-                            byte[] speechSkip2False =
+
+                            if (fireRedVersion == "FasterFireRed")
                             {
+                                byte[] speechSkipFalse = { 0xF1, 0xFD, 0x12 };
+                                byte[] speechSkip2False =
+                                {
                                 0x14, 0x4B, 0x1A, 0x68, 0x11, 0x7D, 0x08, 0x20, 0x40, 0x42, 0x08, 0x40, 0x01, 0x21, 0x08, 0x43,
                                 0x10, 0x75, 0x1A, 0x68, 0x11, 0x7D, 0x07, 0x20,
-                            };
-                            bw.Seek(Convert.ToInt32(speechSkip), SeekOrigin.Begin);
-                            bw.Write(speechSkipFalse);
-                            bw.Seek(Convert.ToInt32(speechSkipInfo3), SeekOrigin.Begin);
-                            bw.Write(speechSkip2False);
+                                };
+                                bw.Seek(Convert.ToInt32(speechSkip), SeekOrigin.Begin);
+                                bw.Write(speechSkipFalse);
+                                bw.Seek(Convert.ToInt32(speechSkipInfo3), SeekOrigin.Begin);
+                                bw.Write(speechSkip2False);
+                            }
+                            else if (fireRedVersion == "OldFireRed")
+                            {
+                                byte[] speechSkipFalse = { 0xE9, 0xB9, 0xC8 };
+                                byte[] speechSkip2False =
+                                {
+                                0x14, 0x4B, 0x1A, 0x68, 0x11, 0x7D, 0x08, 0x20, 0x40, 0x42, 0x08, 0x40, 0x01, 0x21, 0x08, 0x43,
+                                0x10, 0x75, 0x1A, 0x68, 0x11, 0x7D, 0x07, 0x20,
+                                };
+                                bw.Seek(Convert.ToInt32(speechSkip), SeekOrigin.Begin);
+                                bw.Write(speechSkipFalse);
+                                bw.Seek(Convert.ToInt32(speechSkipInfo3), SeekOrigin.Begin);
+                                bw.Write(speechSkip2False);
+                            }
                         }
                     }
                     if (gameCode == "BPEE") // Emerald
